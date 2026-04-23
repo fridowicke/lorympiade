@@ -241,7 +241,11 @@ body {
   }
 
   .scroll-stage {
-    min-height: 150vh;
+    min-height: 100vh;
+  }
+
+  .sticky-stage {
+    position: relative;
   }
 
   .figure-stage {
@@ -259,11 +263,12 @@ body {
   }
 
   .arc-title {
+    top: 24px;
     height: 252px;
   }
 
   .arc-letter {
-    font-size: clamp(1.35rem, 5vw, 2rem);
+    font-size: clamp(1.48rem, 5.45vw, 2.18rem);
     transform-origin: center 176px;
   }
 
@@ -292,7 +297,7 @@ body {
   }
 
   .scroll-paragraph {
-    font-size: clamp(1.18rem, 3.8vw, 2.4rem);
+    font-size: clamp(1.28rem, 4.15vw, 2.55rem);
     line-height: 0.96;
   }
 }
@@ -304,7 +309,7 @@ body {
   }
 
   .scroll-stage {
-    min-height: 126vh;
+    min-height: 100vh;
   }
 
   .figure-stage {
@@ -314,11 +319,12 @@ body {
   }
 
   .arc-title {
+    top: 142px;
     height: 184px;
   }
 
   .arc-letter {
-    font-size: clamp(1rem, 6.2vw, 1.45rem);
+    font-size: clamp(1.1rem, 6.7vw, 1.58rem);
     transform-origin: center 122px;
   }
 
@@ -362,7 +368,7 @@ body {
   }
 
   .scroll-paragraph {
-    font-size: 1.02rem;
+    font-size: 1.4rem;
     line-height: 0.98;
   }
 }

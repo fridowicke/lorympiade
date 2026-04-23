@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 const olympicColors = ["#0085c7", "#f4c300", "#111111", "#009f3d", "#df0024"];
@@ -120,23 +120,24 @@ function isInsidePhraseAfterStart(line, phrase, wordIndex) {
   });
 }
 
-function ArcTitle({ explodeProgress }) {
+function ArcTitleContent({ explodeProgress }) {
   const spreadCount = Math.max(letters.length - 1, 1);
   const arcMotion = useArcMotion();
+  const titleProgress = arcMotion.usesOvalPath ? 0.6 : explodeProgress;
 
   return (
     <div className="arc-title" aria-label={arcTitle}>
       {letters.map((letter, index) => {
         const baseAngle = -52 + index * (104 / spreadCount);
         const burstAngle = -132 + index * (264 / spreadCount);
-        const angle = baseAngle + (burstAngle - baseAngle) * explodeProgress;
+        const angle = baseAngle + (burstAngle - baseAngle) * titleProgress;
         const angleRadians = (angle * Math.PI) / 180;
-        const radius = 236 + 150 * explodeProgress;
+        const radius = 236 + 150 * titleProgress;
         const ovalX = arcMotion.usesOvalPath ? Math.sin(angleRadians) * arcMotion.radiusX : 0;
         const ovalY = arcMotion.usesOvalPath ? -Math.cos(angleRadians) * arcMotion.radiusY : 0;
-        const spread = 1 + explodeProgress * 1.1;
-        const scale = 1 + explodeProgress * 0.6;
-        const opacity = 1 - explodeProgress * 0.18;
+        const spread = 1 + titleProgress * 1.1;
+        const scale = 1 + titleProgress * 0.6;
+        const opacity = 1 - titleProgress * 0.18;
         const transform = arcMotion.usesOvalPath
           ? `translateX(-50%) translate(${ovalX}px, ${ovalY}px) scale(${scale})`
           : `translateX(-50%) rotate(${angle}deg) translateY(-${radius}px) scale(${scale})`;
@@ -166,6 +167,14 @@ function ArcTitle({ explodeProgress }) {
     </div>
   );
 }
+
+const ArcTitle = memo(ArcTitleContent, (previousProps, nextProps) => {
+  if (typeof window !== "undefined" && window.matchMedia("(max-width: 900px)").matches) {
+    return true;
+  }
+
+  return previousProps.explodeProgress === nextProps.explodeProgress;
+});
 
 function Poster() {
   const [flipped, setFlipped] = useState(false);
