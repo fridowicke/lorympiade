@@ -57,6 +57,37 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+function getArcMotion() {
+  if (typeof window === "undefined") {
+    return { usesOvalPath: false };
+  }
+
+  if (window.matchMedia("(max-width: 640px)").matches) {
+    return { usesOvalPath: true, radiusX: 150, radiusY: 300 };
+  }
+
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    return { usesOvalPath: true, radiusX: 154, radiusY: 216 };
+  }
+
+  return { usesOvalPath: false };
+}
+
+function useArcMotion() {
+  const [arcMotion, setArcMotion] = useState(getArcMotion);
+
+  useEffect(() => {
+    const onResize = () => {
+      setArcMotion(getArcMotion());
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return arcMotion;
+}
+
 function isHighlightedWord(line, wordIndex) {
   const lowerLine = line.map((word) => word.toLowerCase());
 
@@ -91,6 +122,7 @@ function isInsidePhraseAfterStart(line, phrase, wordIndex) {
 
 function ArcTitle({ explodeProgress }) {
   const spreadCount = Math.max(letters.length - 1, 1);
+  const arcMotion = useArcMotion();
 
   return (
     <div className="arc-title" aria-label={arcTitle}>
@@ -98,10 +130,17 @@ function ArcTitle({ explodeProgress }) {
         const baseAngle = -52 + index * (104 / spreadCount);
         const burstAngle = -132 + index * (264 / spreadCount);
         const angle = baseAngle + (burstAngle - baseAngle) * explodeProgress;
+        const angleRadians = (angle * Math.PI) / 180;
         const radius = 236 + 150 * explodeProgress;
+        const ovalX = arcMotion.usesOvalPath ? Math.sin(angleRadians) * arcMotion.radiusX : 0;
+        const ovalY = arcMotion.usesOvalPath ? -Math.cos(angleRadians) * arcMotion.radiusY : 0;
         const spread = 1 + explodeProgress * 1.1;
         const scale = 1 + explodeProgress * 0.6;
         const opacity = 1 - explodeProgress * 0.18;
+        const transform = arcMotion.usesOvalPath
+          ? `translateX(-50%) translate(${ovalX}px, ${ovalY}px) scale(${scale})`
+          : `translateX(-50%) rotate(${angle}deg) translateY(-${radius}px) scale(${scale})`;
+        const letterRotation = arcMotion.usesOvalPath ? 0 : -angle;
         return (
           <span
             key={`${letter}-${index}`}
@@ -109,14 +148,14 @@ function ArcTitle({ explodeProgress }) {
             style={{
               color: olympicColors[index % olympicColors.length],
               opacity,
-              transform: `translateX(-50%) rotate(${angle}deg) translateY(-${radius}px) scale(${scale})`,
+              transform,
             }}
           >
             <span
               className="arc-letter-inner"
               style={{
                 letterSpacing: `${0.08 + explodeProgress * 0.08}em`,
-                transform: `rotate(${-angle}deg) scaleX(${spread})`,
+                transform: `rotate(${letterRotation}deg) scaleX(${spread})`,
               }}
             >
               {letter === " " ? "\u00A0" : letter}
